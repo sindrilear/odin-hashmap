@@ -1,8 +1,8 @@
-const {LinkedList, Node } = require('../odin-linkedlist/linkedlist.js');
+const { LinkedList, Node } = require("../odin-linkedlist/linkedlist.js");
 
 class HashMap {
   constructor() {
-    this.loadfactor = 0.8;
+    this.loadfactor = 0.75;
     this.capacity = 0;
     this.size = 16;
     this.buckets = [];
@@ -12,12 +12,38 @@ class HashMap {
     const index = hash(key) % this.size;
     return index;
   }
-  
+
+  addCapacity() {
+    this.capacity++;
+    let loadCapacity = this.size * this.loadfactor;
+    // console.log(this.capacity/this.size);
+    if (this.capacity > loadCapacity) {
+      this.growArray();
+    }
+  }
+
+  getCapacity() {
+    console.log(`Current capacity: ${this.capacity}, Current load: ${this.capacity/this.size}`)
+  }
+
+  growArray() {
+    this.size *= 2;
+    let entries = this.entries();
+    this.clear();
+    for (let i = 0; i < entries.length; i++) {
+      let text = entries[i].replace(/[^\w\s,]/g, "");
+      let splitText = text.split(",");
+      let key = splitText[0].trim();
+      let value = splitText[1].trim();
+      this.set(key, value);
+    }
+  }
+
   set(key, value) {
     const keyIndex = this.keyIndex(key);
     let object = {
       key: key,
-      value: value
+      value: value,
     };
     if (this.buckets[keyIndex] === undefined) {
       const bucketlist = new LinkedList();
@@ -31,11 +57,12 @@ class HashMap {
         this.buckets[keyIndex].append(object);
       }
     }
+    this.addCapacity();
   }
 
   get(key) {
-     const keyIndex = this.keyIndex(key);
-     if (this.buckets[keyIndex].findKey(key) != "Key not found") {
+    const keyIndex = this.keyIndex(key);
+    if (this.buckets[keyIndex].findKey(key) != "Key not found") {
       let linkedIndex = this.buckets[keyIndex].findKey(key);
       return this.buckets[keyIndex].index(linkedIndex).value.value;
     } else {
@@ -47,8 +74,8 @@ class HashMap {
     const keyIndex = this.keyIndex(key);
 
     if (!this.buckets[keyIndex]) {
-      return false
-    } else if ( this.buckets[keyIndex]?.findKey(key) != "Key not found") {
+      return false;
+    } else if (this.buckets[keyIndex]?.findKey(key) != "Key not found") {
       return true;
     } else {
       return false;
@@ -59,7 +86,7 @@ class HashMap {
     if (!this.has(key)) {
       return false;
     } else {
-      const keyIndex = this.keyIndex(key)
+      const keyIndex = this.keyIndex(key);
       let index = this.buckets[keyIndex].findKey(key);
       this.buckets[keyIndex].removeAt(index);
       return true;
@@ -68,7 +95,7 @@ class HashMap {
 
   length() {
     let n = 0;
-    for (let i = 0; i < this.size; i ++) {
+    for (let i = 0; i < this.size; i++) {
       let size = this.buckets[i]?.getSize();
       if (size != undefined) {
         n += size;
@@ -83,12 +110,58 @@ class HashMap {
 
   keys() {
     let array = [];
-    for (i = 0; i < this.size; i ++) {
+    for (let i = 0; i < this.size; i++) {
       let isEmpty = this.buckets[i]?.getSize();
       if (isEmpty != undefined) {
-
+        let currentNode = this.buckets[i].head;
+        while (currentNode !== null) {
+          let nodeKey = currentNode.value.key;
+          if (nodeKey != null) {
+            array.push(nodeKey);
+          }
+          currentNode = currentNode.next;
+        }
       }
     }
+    return array;
+  }
+
+  values() {
+    let array = [];
+    for (let i = 0; i < this.size; i++) {
+      let isEmpty = this.buckets[i]?.getSize();
+      if (isEmpty != undefined) {
+        let currentNode = this.buckets[i].head;
+        while (currentNode !== null) {
+          let nodeKey = currentNode.value.key;
+          let nodeValue = currentNode.value.value;
+          if (nodeKey != null) {
+            array.push(nodeValue);
+          }
+          currentNode = currentNode.next;
+        }
+      }
+    }
+    return array;
+  }
+
+  entries() {
+    let array = [];
+    for (let i = 0; i < this.size; i++) {
+      let isEmpty = this.buckets[i]?.getSize();
+      if (isEmpty != undefined) {
+        let currentNode = this.buckets[i].head;
+        while (currentNode !== null) {
+          let nodeKey = currentNode.value.key;
+          let nodeValue = currentNode.value.value;
+          if (nodeKey != null) {
+            array.push(`[${nodeKey}, ${nodeValue}]`);
+          }
+          currentNode = currentNode.next;
+        }
+      }
+    }
+    return array;
   }
 }
 
@@ -104,31 +177,3 @@ function hash(key) {
 }
 
 const test = new HashMap();
-test.set('apple', 'red')
-console.log(test.get("apple"));
-test.set('banana', 'yellow')
-test.set('carrot', 'orange')
-test.set('dog', 'brown')
-console.log(test.get("banana"));
-console.log(test.has("orange"));
-console.log(test.remove("apple"))
-console.log(test.get("apple"));
-console.log(test.length())
-test.clear();
-console.log(test.length())
-
-
-
-// test.set('carrot', 'orange')
-// test.set('dog', 'brown')
-// test.set('elephant', 'gray')
-// test.set('frog', 'green')
-// test.set('grape', 'purple')
-// test.set('hat', 'black')
-// test.set('ice cream', 'white')
-// test.set('jacket', 'blue')
-// test.set('kite', 'pink')
-// test.set('lion', 'golden')
-// console.log(hash("dog") % 16);
-// console.log(test.get("dog"));
-// console.log(test.buckets[12]);
